@@ -16,18 +16,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Docker
+        run: |
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found. Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+            else
+              echo "Docker already installed"
+            fi
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"         
       - name: Build and push Docker Image
         run: |
           echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_ACCESS_USER }}" --password-stdin
           cd src/
           docker build -t ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price ./Dockerfile
           docker push ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"         
           
   # Deployment job
   deploy:
