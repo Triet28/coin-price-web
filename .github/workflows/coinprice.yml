@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_ACCESS_USER }}" --password-stdin
           cd src/
-          docker build -t ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price ./
+          docker build -t ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price .github/workflows/Dockerfile
           docker push ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price
       - name: Setup Node
         uses: actions/setup-node@v4
