@@ -1,6 +1,7 @@
 name: Coin Price dev
 
 on:
+  # Runs on pushes targeting the default branch
   push:
     branches: ["development"]
     paths-ignore:
@@ -8,23 +9,25 @@ on:
       - Design/**
       - Documents/**
       - Meeting minutes/**
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
 jobs:
+  # Build job
   build:
-    runs-on: windows-latest
+    runs-on: self-hosted
     steps:
       - name: Set up Docker
-        shell: pwsh
         run: |
-          if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-            Write-Host "Docker not found. Installing Docker..."
-            # Thực hiện cài đặt Docker cho Windows (nếu cần)
-            Invoke-WebRequest -Uri https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe -OutFile DockerInstaller.exe
-            Start-Process -FilePath DockerInstaller.exe -ArgumentList "install" -Wait
-          } else {
-            Write-Host "Docker already installed"
-          }
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found. Installing Docker..."
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+            else
+              echo "Docker already installed"
+            fi
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build and push Docker Image
@@ -35,11 +38,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
+          node-version: "20"         
+          
+  # Deployment job
   deploy:
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Pull Docker image
         run: |
@@ -47,3 +51,4 @@ jobs:
           docker rm coin-price || true
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/coin-price:latest
           docker run -d -p 3000:3000 --name coin-price ${{ secrets.DOCKERHUB_USERNAME }}/coin-price:latest
+\
