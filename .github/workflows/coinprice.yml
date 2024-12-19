@@ -50,4 +50,4 @@ jobs:
           docker stop coin-price || true 
           docker rm coin-price || true
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/coin-price:latest
-          docker run -d -p 3000:3000 --name coin-price ${{ secrets.DOCKERHUB_USERNAME }}/coin-price:latest
+          docker build --build-arg API_URL=https://api.example.com -t ${{ secrets.DOCKER_HUB_ACCESS_USER }}/coin-price .
