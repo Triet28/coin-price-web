@@ -14,7 +14,7 @@ on:
 jobs:
   # Build job
   build:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Docker
         run: |
@@ -43,7 +43,7 @@ jobs:
   # Deployment job
   deploy:
     needs: build
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - name: Pull Docker image
         run: |
